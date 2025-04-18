@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -24,6 +24,7 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
   const [lastCheckInAttempt, setLastCheckInAttempt] = useState(null);
   const [lastCheckOutAttempt, setLastCheckOutAttempt] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [fingerprintFailed, setFingerprintFailed] = useState(false);
 
   const handleFingerprintAuth = async () => {
@@ -33,6 +34,7 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
       return false;
     }
 
+    setIsScanning(true);
     try {
       const publicKey = {
         challenge: Uint8Array.from('randomChallengeString123', c => c.charCodeAt(0)),
@@ -48,6 +50,8 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
       console.error('Fingerprint authentication failed:', err);
       setFingerprintFailed(true);
       return false;
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -207,7 +211,7 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
     const initializeDashboard = async () => {
       const needsCheckIn = await fetchDashboardData();
       if (needsCheckIn && !fingerprintFailed) {
-        await handleAutoCheckIn();
+        openFingerprintModal();
       }
 
       gsap.from('.statCard', {
@@ -237,6 +241,13 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
 
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants = { hidden: { x: -20, opacity: 0 }, visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } } };
+
+  const openFingerprintModal = () => {
+    setIsScanning(true);
+    handleFingerprintAuth().then((success) => {
+      if (success) handleAutoCheckIn();
+    });
+  };
 
   return (
     <div className={styles.dashboardContainer}>
@@ -287,6 +298,17 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
                 disabled={isLoading}
               >
                 Check Out
+              </motion.button>
+            )}
+            {!isCheckedIn && (
+              <motion.button
+                className={styles.checkInBtn}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openFingerprintModal}
+                disabled={isLoading || isScanning}
+              >
+                {isScanning ? 'Scanning...' : 'Check In with Fingerprint'}
               </motion.button>
             )}
           </motion.div>
@@ -417,6 +439,18 @@ const EmployeeDashboard = ({ onLogout, token, employee }) => {
           </motion.div>
         </div>
       </div>
+
+      {isScanning && (
+        <div className={styles.fingerprintModal}>
+          <div className={styles.modalContent}>
+            <h3>Making sure it's you</h3>
+            <div className={styles.fingerprintIcon}>👆</div> {/* Replace with an SVG or image */}
+            <p>Scan your finger on the fingerprint reader.</p>
+            {fingerprintFailed && <p style={{ color: 'red' }}>Fingerprint scan failed. Try again.</p>}
+            <button onClick={() => setIsScanning(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
