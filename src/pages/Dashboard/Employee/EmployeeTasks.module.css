@@ -1,0 +1,548 @@
+.tasksContainer {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tasksHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tasksHeader h1 {
+  font-size: 2rem;
+  background: linear-gradient(90deg, var(--accent-color), #6a78fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+
+.filterContainer {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filterBtn {
+  padding: 0.6rem 1rem;
+  background-color: var(--bg-accent);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.filterBtn:hover {
+  background-color: rgba(74, 140, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.filterBtn.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.tasksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.taskCard {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.taskCard:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-5px);
+}
+
+.taskCard:hover .viewDetailsBtn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.taskCardHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.taskPriority, .taskStatus {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.priorityHigh {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--danger-color);
+}
+
+.priorityMedium {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: var(--warning-color);
+}
+
+.priorityLow {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success-color);
+}
+
+.statusCompleted {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success-color);
+}
+
+.statusPartial {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: var(--warning-color);
+}
+
+.statusPending, .statusTodo {
+  background-color: rgba(74, 140, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.taskTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.taskDescription {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  height: 4.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.taskMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.taskDeadline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.taskDeadline svg {
+  width: 14px;
+  height: 14px;
+}
+
+.viewDetailsBtn {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  opacity: 0.8;
+  transform: translateY(5px);
+}
+
+.viewDetailsBtn:hover {
+  background-color: var(--accent-color-dark);
+}
+
+/* Modal Styles - REVISED */
+.modalBackdrop {
+  position: fixed;
+  inset: 0; /* This is shorthand for top: 0; right: 0; bottom: 0; left: 0; */
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.taskModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) !important; /* !important to override any animation transforms */
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin: 0 !important; /* Override any margins that could affect positioning */
+}
+
+.taskModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--bg-accent);
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-secondary);
+  z-index: 2;
+}
+
+.taskModalHeader h2 {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.closeModalBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeModalBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.taskModalContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .taskModalContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+.taskDetailsSection, .taskCommentsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.taskDetailItem h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.taskDetailItem p {
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.taskMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-accent);
+  border-radius: var(--border-radius);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.taskStatusUpdate h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.statusButtonGroup {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.statusBtn {
+  padding: 0.6rem 1rem;
+  background-color: var(--bg-accent);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.statusBtn:hover {
+  background-color: rgba(74, 140, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.statusBtn.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.commentsContainer {
+  background-color: var(--bg-accent);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.commentItem {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.ownComment {
+  border-left: 3px solid var(--accent-color);
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.commentAuthor {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.commentAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.commentTime {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.commentText {
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.noComments {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.addCommentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.commentInput {
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-accent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.commentInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.addCommentBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  align-self: flex-end;
+  width: auto;
+  min-width: 100px;
+}
+
+.addCommentBtn:hover {
+  background-color: var(--accent-color-dark);
+}
+
+.addCommentBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading and Error States */
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: var(--text-secondary);
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.errorMessage {
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+  color: var(--danger-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.errorMessage button {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.errorMessage button:hover {
+  background-color: rgba(244, 67, 54, 0.8);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.emptyState svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.emptyState p {
+  color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .tasksHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .filterContainer {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .tasksContainer {
+    padding: 1rem;
+  }
+  
+  .tasksGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .taskModalHeader {
+    padding: 1rem;
+  }
+  
+  .taskModalContent {
+    padding: 1rem;
+  }
+}

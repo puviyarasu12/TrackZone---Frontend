@@ -1,0 +1,341 @@
+.attendanceLogContainer {
+  padding: 1.5rem;
+  background-color: var(--bg-color, #f5f7fa);
+  min-height: calc(100vh - 80px);
+  color: var(--text-color, #333);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e1e5eb);
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-color, #1a73e8);
+  margin: 0;
+}
+
+.breadcrumb {
+  font-size: 0.9rem;
+  color: var(--text-light, #666);
+}
+
+.breadcrumb a {
+  color: var(--primary-color, #1a73e8);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.statIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.statIcon[data-type="present"] {
+  background-color: rgba(0, 184, 124, 0.1);
+  color: #00b87c;
+}
+
+.statIcon[data-type="absent"] {
+  background-color: rgba(239, 71, 111, 0.1);
+  color: #ef476f;
+}
+
+.statIcon[data-type="late"] {
+  background-color: rgba(255, 159, 28, 0.1);
+  color: #ff9f1c;
+}
+
+.statIcon[data-type="leave"] {
+  background-color: rgba(106, 76, 147, 0.1);
+  color: #6a4c93;
+}
+
+.statInfo h3 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-light, #666);
+  margin: 0 0 0.25rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color, #333);
+}
+
+.controlPanel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.monthSelector {
+  display: flex;
+  align-items: center;
+}
+
+.monthSelector h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color, #333);
+  min-width: 200px;
+  text-align: center;
+}
+
+.arrowBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--primary-color, #1a73e8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.arrowBtn:hover {
+  background-color: rgba(26, 115, 232, 0.08);
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filterContainer label {
+  font-size: 0.9rem;
+  color: var(--text-light, #666);
+}
+
+.filterSelect {
+  background-color: white;
+  border: 1px solid var(--border-color, #e1e5eb);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-color, #333);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary-color, #1a73e8);
+}
+
+.tableContainer {
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.attendanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.attendanceTable th,
+.attendanceTable td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e1e5eb);
+}
+
+.attendanceTable th {
+  background-color: var(--table-header-bg, #f9fafb);
+  font-weight: 600;
+  color: var(--text-light, #666);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attendanceTable th:hover {
+  background-color: var(--table-header-hover-bg, #edf2f7);
+}
+
+.attendanceTable tr:last-child td {
+  border-bottom: none;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusPresent {
+  background-color: rgba(0, 184, 124, 0.1);
+  color: #00b87c;
+}
+
+.statusAbsent {
+  background-color: rgba(239, 71, 111, 0.1);
+  color: #ef476f;
+}
+
+.statusLate {
+  background-color: rgba(255, 159, 28, 0.1);
+  color: #ff9f1c;
+}
+
+.statusLeave {
+  background-color: rgba(106, 76, 147, 0.1);
+  color: #6a4c93;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.loader {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--primary-color, #1a73e8);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #ef476f;
+  text-align: center;
+}
+
+.errorContainer svg {
+  color: #ef476f;
+  margin-bottom: 1rem;
+}
+
+.errorContainer h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.errorContainer p {
+  margin: 0 0 1.5rem;
+  color: var(--text-light, #666);
+}
+
+.retryBtn {
+  background-color: var(--primary-color, #1a73e8);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryBtn:hover {
+  background-color: var(--primary-dark, #1557b0);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background-color: var(--card-bg, #fff);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  color: var(--text-light, #666);
+}
+
+.emptyState svg {
+  color: var(--text-light, #666);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  color: var(--text-color, #333);
+}
+
+.emptyState p {
+  margin: 0;
+}
