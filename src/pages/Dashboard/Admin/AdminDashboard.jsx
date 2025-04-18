@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Circle, Marker, Popup } from 'react-leaflet';
 import { gsap } from 'gsap';
 import { jwtDecode } from 'jwt-decode';
+import './AdminDashboard.module.css';
 
 // Embedded ErrorBoundary class
 class ErrorBoundary extends React.Component {
