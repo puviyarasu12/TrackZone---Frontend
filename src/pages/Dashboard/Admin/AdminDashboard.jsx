@@ -3,9 +3,17 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Circle, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet'; // Import Leaflet for custom icons
 import { gsap } from 'gsap';
-import { jwtDecode } from 'jwt-decode';
-import './AdminDashboard.module.css';
+import { jwtDecode } from 'jwt-decode';// Required for react-leaflet
+
+// Fix Leaflet default icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 // Embedded ErrorBoundary class
 class ErrorBoundary extends React.Component {
@@ -151,9 +159,9 @@ const AdminDashboard = ({ onLogout }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to load dashboard overview');
-      }
+        if (response.status !== 200) {
+          throw new Error(response.data.message || 'Failed to load dashboard overview');
+        }
 
         setAttendanceSummary({
           totalEmployees: response.data.total || 0,
@@ -193,9 +201,9 @@ const AdminDashboard = ({ onLogout }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to fetch employees');
-      }
+        if (response.status !== 200) {
+          throw new Error(response.data.message || 'Failed to fetch employees');
+        }
 
         const mappedEmployees = response.data.map(emp => ({
           id: emp._id,
@@ -248,9 +256,9 @@ const AdminDashboard = ({ onLogout }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to fetch active employees');
-      }
+        if (response.status !== 200) {
+          throw new Error(response.data.message || 'Failed to fetch active employees');
+        }
 
         setEmployees(prev =>
           prev.map(emp => {
@@ -303,9 +311,9 @@ const AdminDashboard = ({ onLogout }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to fetch tasks');
-      }
+        if (response.status !== 200) {
+          throw new Error(response.data.message || 'Failed to fetch tasks');
+        }
 
         setTasks(
           response.data.map(task => ({
@@ -401,7 +409,7 @@ const AdminDashboard = ({ onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(response.data.message || 'Failed to send notification');
       }
 
@@ -457,7 +465,7 @@ const AdminDashboard = ({ onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(response.data.message || 'Failed to update geofence');
       }
 
@@ -527,6 +535,887 @@ const AdminDashboard = ({ onLogout }) => {
   return (
     <ErrorBoundary>
       <div className="dashboardContainer">
+        <style>
+          {`
+          /* CSS Variables for theming */
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #388e3c;
+  --danger-color: #d32f2f;
+  --background-color: #f4f7fa;
+  --surface-color: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #777777;
+  --border-color: #dddddd;
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+/* Dashboard Container */
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+/* Loading and Error States */
+.loading {
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  padding: 2rem;
+}
+
+.error {
+  background-color: #ffe6e6;
+  color: var(--danger-color);
+  padding: 0.75rem 1rem;
+  border零部件
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Top Bar */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-color);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* Date and Clock */
+.dateContainer, .clockContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.date, .clock {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Notification Bell */
+.notificationBell {
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.notificationBell:hover {
+  transform: scale(1.1);
+}
+
+.notificationCount {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background-color: var(--danger-color);
+  color: var(--surface-color);
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.notificationBell svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--text-secondary);
+}
+
+/* User Info */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.userInfo .avatar img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Main Content */
+.mainContent {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 16rem;
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* User Profile */
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatarLarge img {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.userProfileInfo h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+}
+
+.userProfileInfo p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.lastLogin {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.lastLoginLabel {
+  font-weight: 500;
+}
+
+/* Sidebar Navigation */
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebarNav a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: var(--transition);
+}
+
+.sidebarNav a:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebarNav a.active {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.sidebarNav a svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--danger-color);
+  color: var(--surface-color);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.logoutBtn:hover {
+  background-color: #b71c1c;
+}
+
+.logoutBtn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Dashboard Content */
+.dashboardContent {
+  flex: 1;
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* Dashboard Header */
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.welcomeMessage {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Quick Actions */
+.quickActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.addEmployeeBtn {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.addEmployeeBtn:hover {
+  background-color: #1565c0;
+}
+
+.notificationBtn {
+  background-color: var(--secondary-color);
+  color: var(--surface-color);
+}
+
+.notificationBtn:hover {
+  background-color: #2e7d32;
+}
+
+.geofenceBtn {
+  background-color: #0288d1;
+  color: var(--surface-color);
+}
+
+.geofenceBtn:hover {
+  background-color: #0277bd;
+}
+
+.actionBtn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Stats Container */
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.statCard {
+  background-color: var(--surface-color);
+  padding: 1.25rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: var(--transition);
+}
+
+.statCard:hover {
+  transform: translateY(-0.25rem);
+}
+
+.statIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.employeesIcon {
+  background-color: #e3f2fd;
+}
+
+.presentIcon {
+  background-color: #e8f5e9;
+}
+
+.leaveIcon {
+  background-color: #ffebee;
+}
+
+.hoursIcon {
+  background-color: #e0f7fa;
+}
+
+.statIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.statInfo h3 {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Widgets Container */
+.widgetsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.5rem;
+}
+
+/* Widget */
+.widget {
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.widgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.widgetHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.viewAll, .configureBtn {
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.viewAll:hover, .configureBtn:hover {
+  text-decoration: underline;
+}
+
+/* Employees List */
+.employeesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.employeeCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.employeeCard:hover {
+  background-color: #f9f9f9;
+}
+
+.employeeAvatar {
+  position: relative;
+}
+
+.employeeAvatar img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.statusIndicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  border: 2px solid var(--surface-color);
+}
+
+.statusIndicator.active {
+  background-color: var(--secondary-color);
+}
+
+.statusIndicator.inactive {
+  background-color: var(--danger-color);
+}
+
+.employeeInfo h4 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.employeeInfo p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.checkInInfo {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.checkInLabel {
+  font-weight: 500;
+}
+
+/* Tasks List */
+.tasksList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.taskCard {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+}
+
+.taskHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.taskHeader h4 {
+  font-size: 1rem;
+}
+
+.taskPriority {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--surface-color);
+}
+
+.taskPriority.low {
+  background-color: var(--secondary-color);
+}
+
+.taskPriority.medium {
+  background-color: #ff9800;
+}
+
+.taskPriority.high {
+  background-color: var(--danger-color);
+}
+
+.taskDetails {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.taskLabel {
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.taskStatus {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  display: inline-block;
+}
+
+.taskStatus.todo {
+  background-color: #e0e0e0;
+  color: var(--text-primary);
+}
+
+.taskStatus.inprogress {
+  background-color: #bbdefb;
+  color: var(--primary-color);
+}
+
+.taskStatus.completed {
+  background-color: #e8f5e9;
+  color: var(--secondary-color);
+}
+
+/* Activity List */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activityItem {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.activityInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activityText {
+  font-size: 0.875rem;
+}
+
+.activityUser {
+  font-weight: 500;
+}
+
+.activityTime {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Map Container */
+.mapContainer {
+  height: 18rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+/* Employee Popup */
+.employeePopup {
+  font-size: 0.875rem;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 32rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modalHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.closeBtn:hover {
+  color: var(--text-primary);
+}
+
+/* Forms */
+.notificationForm, .geofenceForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.radioGroup label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.formRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.formRow .formGroup {
+  flex: 1;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.cancelBtn {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cancelBtn:hover {
+  background-color: #e0e0e0;
+}
+
+.submitBtn {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.submitBtn:hover {
+  background-color: #1565c0;
+}
+
+/* Employee Modal */
+.employeeModal {
+  max-width: 40rem;
+}
+
+.employeeProfileHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.employeeAvatarLarge img {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.employeeProfileInfo h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.employeePosition, .employeeDepartment {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.employeeDetailSection {
+  margin-bottom: 1.5rem;
+}
+
+.employeeDetailSection h4 {
+  font-size: 1.125rem;
+  margin-bottom: 0.75rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.detailLabel {
+  font-weight: 500;
+}
+
+.detailValue.status.active {
+  color: var(--secondary-color);
+  font-weight: 500;
+}
+
+.detailValue.status.inactive {
+  color: var(--danger-color);
+  font-weight: 500;
+}
+
+.employeeModalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.employeeModalActions .actionBtn {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.messageBtn {
+  background-color: var(--secondary-color);
+  color: var(--surface-color);
+}
+
+.editBtn {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.viewHistoryBtn {
+  background-color: #0288d1;
+  color: var(--surface-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainContent {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .widgetsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .quickActions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+
+  .modal {
+    width: 95%;
+  }
+}
+          `}
+        </style>
+
         {error && (
           <div className="error">
             {error}
@@ -1046,7 +1935,7 @@ const AdminDashboard = ({ onLogout }) => {
                     </div>
                     <div className="tasksList">
                       {tasks.slice(0, 5).map(task => (
-                        <motion.div key={task.id} className="taskCard" variants={itemVariants}>
+                        <motion.div key={task.id} className="taskCard" variants bundledItems={itemVariants}>
                           <div className="taskHeader">
                             <h4>{task.title}</h4>
                             <span
@@ -1503,7 +2392,7 @@ const AdminDashboard = ({ onLogout }) => {
                           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                         Message
-                      </button>
+                                            </button>
                       <button
                         className="actionBtn editBtn"
                         onClick={() => alert('Edit profile feature not implemented')}
@@ -1517,8 +2406,8 @@ const AdminDashboard = ({ onLogout }) => {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                         Edit Profile
                       </button>
@@ -1535,8 +2424,9 @@ const AdminDashboard = ({ onLogout }) => {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="12 6 12 12 16 14"></polyline>
+                          <path d="M12 2v6h6" />
+                          <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" />
+                          <polyline points="12 10 12 14 14 16" />
                         </svg>
                         View History
                       </button>
